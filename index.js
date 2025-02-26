@@ -164,10 +164,10 @@ app.post("/insertquestion",(req,res)=>{
     
    
 })
-app.get('/api/get-ip', (req, res) => {
-    const ip = req.headers['x-forwarded-for'] || req.socket[0];
-    res.json({ ip });
-});
+// app.get('/api/get-ip', (req, res) => {
+//     const ip = req.headers['x-forwarded-for'] || req.socket[0];
+//     res.json({ ip });
+// });
 app.post('/text-mail', (req, res) => {
     var {emails}=req.body
     var emailsplit=emails.split(',')
@@ -349,12 +349,19 @@ res.json({ stdout, stderr });
     });
 });
 
+  app.get('/get-ip', (req, res) => {
+    const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    console.log(clientIp)
+    res.send(clientIp);
+  });
 
   app.get('/demoymlfile', (req, res) => {
     const demofile = path.join(__dirname, 'docker-compose.yml');
     res.download(demofile);
     // res.sendFile(path.join(__dirname, 'demoymlfile.yml'));
   });
+
+  
 
 app.listen(process.env.PORT || 5000, () => { 
     console.log("the port is running in 5000")
