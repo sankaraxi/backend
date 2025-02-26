@@ -333,6 +333,22 @@ res.json({ stdout, stderr });
     res.download(file);
   });
 
+  app.get('/getquestionbyid', (req, res) => {
+    const id = 1; // Fetching question with id = 1
+
+    const sql = 'SELECT question FROM sample_questions WHERE id = ?';
+    con.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error('Error fetching question:', err);
+            return res.status(500).json({ error: 'Database query error' });
+        }
+        if (result.length === 0) {
+            return res.status(404).json({ message: 'Question not found' });
+        }
+        res.json({ question: result[0].question });
+    });
+});
+
 
   app.get('/demoymlfile', (req, res) => {
     const demofile = path.join(__dirname, 'docker-compose.yml');
