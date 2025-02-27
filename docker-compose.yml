@@ -48,7 +48,7 @@ services:
       MYSQL_HOST: mysql
       # MYSQL_ROOT_PASSWORD: rootpassword
       # MYSQL_DATABASE: testdb
-      MYSQL_ALLOW_EMPTY_PASSWORD: yes
+      MYSQL_ALLOW_EMPTY_PASSWORD: no
     ports:
       - "3306:3306"
     volumes:

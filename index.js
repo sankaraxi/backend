@@ -21,21 +21,27 @@ app.use(express.static('public'));
 const Docker = require('dockerode');
 // Database Connection for dashboard'
 
-let con=mysql.createConnection({
+const con = mysql.createPool({
     host: process.env.DB_HOST,
     port: "3306",
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database:process.env.DB_DATABASE
-})
-con.connect(function(error){
-    if(error){
-        console.log(error)
+    database: process.env.DB_DATABASE,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
+con.getConnection((error, connection) => {
+    if (error) {
+        console.error("Database connection failed:", error);
+    } else {
+        console.log("Database connected successfully for dashboard");
+        connection.release(); // Release connection back to the pool
     }
-    else{
-        console.log("database is connect successfully for dashboard")
-    }
-})
+});
+
+module.exports = con;
 
 const transporter = nodemailer.createTransport({
     services:"Gmail",
