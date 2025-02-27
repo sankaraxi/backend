@@ -91,7 +91,7 @@ const copyModifiedFiles = (source, target, logFile) => {
   };
   const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 
-app.post('/start-container', async (req, res) => {
+app.post('/api/start-container', async (req, res) => {
   try {
     const container = await docker.createContainer({
       Image: 'krishnapriyap/merntest:latest',
@@ -106,7 +106,7 @@ app.post('/start-container', async (req, res) => {
   }
 });
 
-  app.post('/transfer-files', (req, res) => {
+  app.post('/api/transfer-files', (req, res) => {
     try {
       if (!fs.existsSync(targetDir)) {
         fs.mkdirSync(targetDir);
@@ -154,7 +154,7 @@ app.post('/start-container', async (req, res) => {
 //       res.status(500).send('Error transferring files');
 //     }
 //   });
-app.post("/insertquestion",(req,res)=>{
+app.post("/api/insertquestion",(req,res)=>{
     
     var {jsondata,question,category_id,subcategory_id}=req.body
     const createquestion = 'INSERT INTO question(question,testcase,category_id,subcategory_id)values(?,?,?,?)'
@@ -174,7 +174,7 @@ app.post("/insertquestion",(req,res)=>{
 //     const ip = req.headers['x-forwarded-for'] || req.socket[0];
 //     res.json({ ip });
 // });
-app.post('/text-mail', (req, res) => {
+app.post('/api/text-mail', (req, res) => {
     var {emails}=req.body
     var emailsplit=emails.split(',')
 
@@ -204,7 +204,7 @@ app.post('/text-mail', (req, res) => {
         res.status(200).send({ message: "Mail send", message_id: info.messageId });
     });
 });
-app.post("/login",(req,res)=>{
+app.post("/api/login",(req,res)=>{
     let{username,password}=req.body
     let loginsql='select * from cocube_user where emailid=?'
     con.query(loginsql,[username],(error,result)=>{
@@ -233,7 +233,7 @@ app.post("/login",(req,res)=>{
     })
   })
 
-  app.post("/addcategory",(req,res)=>{
+  app.post("/api/addcategory",(req,res)=>{
     var {getcategory}=req.body
     var insertcategory="insert into categories (category_name)values(?)"
     con.query(insertcategory,[getcategory],(error,result)=>{
@@ -247,7 +247,7 @@ app.post("/login",(req,res)=>{
     })
 })
 
-app.get("/getcategory",(req,res)=>{
+app.get("/api/getcategory",(req,res)=>{
   var getcategory="select * from categories"
   con.query(getcategory,(error,result)=>{
       if(error){
@@ -259,7 +259,7 @@ app.get("/getcategory",(req,res)=>{
   })
 })
 
-app.post("/getsubcategory",(req,res)=>{
+app.post("/api/getsubcategory",(req,res)=>{
   var{category}=req.body
   console.log(category)
   var getcategory="select * from subcategories where category_id=?"
@@ -273,7 +273,7 @@ app.post("/getsubcategory",(req,res)=>{
   })
 })
 
-app.post("/subcategory",(req,res)=>{
+app.post("/api/subcategory",(req,res)=>{
   
   var {getcategory,selectcategory}=req.body
   var getcategorysql="select category_id from categories where category_name=?"
@@ -299,7 +299,7 @@ app.post("/subcategory",(req,res)=>{
 
 })
 
-app.get("/getquestion",(req,res)=>{
+app.get("/api/getquestion",(req,res)=>{
     // var {subcategory}=req.body
     var getquestion="select CONVERT(question USING utf8mb4) AS context from question where question_id=10104"
     con.query(getquestion,(error,result)=>{
@@ -311,7 +311,7 @@ app.get("/getquestion",(req,res)=>{
         }
     })
 })
-app.get('/check-docker', (req, res) => {
+app.get('/api/check-docker', (req, res) => {
     exec('docker --version', (error, stdout, stderr) => {
       if (error) {
         res.json({ installed: false, message: 'Docker is not installed' });
@@ -320,7 +320,7 @@ app.get('/check-docker', (req, res) => {
       res.json({ installed: true, message: stdout });
     });
   });
-  app.post('/run-script', (req, res) => {
+  app.post('/api/run-script', (req, res) => {
     exec('./generate-docker-compose.sh -u 200', (error, stdout, stderr) => {
 // exec('docker exec server-code-server-1 sh -c "/home/coder/.hidden/setup/test.sh" ./output.json', (error, stdout, stderr) => {
 if (error) {
@@ -334,12 +334,12 @@ res.json({ stdout, stderr });
 
 });
 });
-  app.get('/download', (req, res) => {
+  app.get('/api/download', (req, res) => {
     const file = path.join(__dirname,  'generate-docker-compose.ps1');
     res.download(file);
   });
 
-  app.get('/getquestionbyid', (req, res) => {
+  app.get('/api/getquestionbyid', (req, res) => {
     const id = 1; // Fetching question with id = 1
 
     const sql = 'SELECT question FROM sample_questions WHERE id = ?';
@@ -355,13 +355,13 @@ res.json({ stdout, stderr });
     });
 });
 
-  app.get('/get-ip', (req, res) => {
+  app.get('/api/get-ip', (req, res) => {
     const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     console.log(clientIp)
     res.send(clientIp);
   });
 
-  app.get('/demoymlfile', (req, res) => {
+  app.get('/api/demoymlfile', (req, res) => {
     const demofile = path.join(__dirname, 'docker-compose.yml');
     res.download(demofile);
     // res.sendFile(path.join(__dirname, 'demoymlfile.yml'));
