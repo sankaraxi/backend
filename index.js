@@ -9,7 +9,7 @@ const path = require('path');
 const app = express()
 const { exec } = require('child_process');
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', process.env.ORIGIN], 
+  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:3000', 'http://192.168.252.230:5173', "http://13.234.186.148:5173", process.env.ORIGIN], 
   methods: ['GET', 'POST'],
   credentials: true
 }));
@@ -204,6 +204,25 @@ app.post('/api/text-mail', (req, res) => {
         res.status(200).send({ message: "Mail send", message_id: info.messageId });
     });
 });
+app.post("/create-payment-intent/:id", async (req, res) => {
+  con
+    const { items } = req.body;
+    const { id } = req.params;
+  
+    try {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: calculateTotalAmount(items),
+        currency: 'usd',
+        metadata: { integration_check: 'accept_a_payment' },
+      });
+  
+      res.status(200).json({ clientSecret: paymentIntent.client_secret });
+    } catch (error) {
+      console.error('Error creating payment intent:', error);
+      res.status(500).json({ error: 'Error creating payment intent' });
+    }
+  }
+);
 app.post("/api/login",(req,res)=>{
     let{username,password}=req.body
     let loginsql='select * from cocube_user where emailid=?'
@@ -320,20 +339,46 @@ app.get('/api/check-docker', (req, res) => {
       res.json({ installed: true, message: stdout });
     });
   });
-  app.post('/api/run-script', (req, res) => {
-    exec('./generate-docker-compose.sh -u 200', (error, stdout, stderr) => {
+  app.post('/api/run-Assesment', (req, res) => {
+    console.log("entered")
+    const textpath="./fullstacktest-main";
+    const command=`cd ${textpath} && npm run test`
+    exec(command, (error, stdout, stderr) => {
 // exec('docker exec server-code-server-1 sh -c "/home/coder/.hidden/setup/test.sh" ./output.json', (error, stdout, stderr) => {
 if (error) {
-console.error(`Error executing script: ${error}`);
+console.log(`Error executing script: ${error}`);
 return res.status(500).json({ error: 'Error executing script' });
+
 }
 console.log(`stdout: ${stdout}`);
 // console.og
 console.error(`stderr: ${stderr}`);
 res.json({ stdout, stderr });
+console.log("error")
+});
+});
 
+
+app.post('/api/run-script', (req, res) => {
+  const userId = 200;
+const psScriptPath = path.join(__dirname, 'generate-docker-compose.ps1');
+
+// Powershell command to execute script with argument
+const command = `powershell.exe -ExecutionPolicy Bypass -File "${psScriptPath}" -UserID ${userId}`;
+
+exec(command, (error, stdout, stderr) => {
+  if (error) {
+    console.error(`❌ Error: ${error.message}`);
+    return;
+  }
+  if (stderr) {
+    console.error(`⚠️ Stderr: ${stderr}`);
+  }
+  console.log(`✅ Stdout:\n${stdout}`);
 });
 });
+
+
   app.get('/api/download', (req, res) => {
     const file = path.join(__dirname,  'generate-docker-compose.ps1');
     res.download(file);
@@ -367,9 +412,27 @@ res.json({ stdout, stderr });
     // res.sendFile(path.join(__dirname, 'demoymlfile.yml'));
   });
 
+  app.post("/fork-sandbox", async (req, res) => {
+    const devBoxId = "cool-cache-38t45s"; // Your CodeSandbox ID
+
+    try {
+        const response = await fetch(`https://codesandbox.io/api/v1/sandboxes/${devBoxId}/fork`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch sandbox" });
+    }
+});
+
   
 
 app.listen(process.env.PORT || 5000, () => { 
-    console.log("the port is running in 5000")
+    console.log(`the port is running in ${process.env.PORT || 5000}`)
 
 })
