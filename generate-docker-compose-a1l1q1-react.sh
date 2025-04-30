@@ -25,7 +25,7 @@ services:
     container_name: "code-server-a1l1q1-react-${USER_ID}"
     image: "sankarkg/a1l1q1-react:latest"
     ports:
-      - "${PORT}:8080"
+      - "8084:8080"
       - "5177:5173"
     volumes:
       - ${HOST_SRC_PATH}:/home/coder/project/src
