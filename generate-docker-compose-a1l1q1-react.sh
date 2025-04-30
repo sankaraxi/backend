@@ -1,20 +1,18 @@
 #!/bin/bash
 
-# Accept UserID and EmployeeNo as arguments
+# Accept UserID as an argument
 USER_ID=$1
 EMPLOYEE_NO=$2
 
-if [ -z "$USER_ID" ] || [ -z "$EMPLOYEE_NO" ]; then
-  echo "Usage: ./generate-docker-compose-a1l1.sh <UserID> <EmployeeNo>"
+if [ -z "$USER_ID" ]; then
+  echo "Usage: ./generate-docker-compose-a1l1.sh <UserID>"
   exit 1
 fi
 
 # Variables
 PORT=$((8080 + USER_ID))
-HOST_SRC_PATH="/home/kgm/docker-volumes/${EMPLOYEE_NO}"
-
-# Ensure the host path exists
-mkdir -p "$HOST_SRC_PATH"
+# PASSWORD="test"
+# IMAGE_NAME="krishnapriyap/merntest:latest"
 
 # Generate Docker Compose file content
 COMPOSE_CONTENT=$(cat <<EOF
@@ -28,17 +26,22 @@ services:
       - "8084:8080"
       - "5177:5173"
     volumes:
-      - ${HOST_SRC_PATH}:/home/coder/project/src
+      - frontend-src-${EMPLOYEE_NO}:/home/coder/project/src
     environment:
       - WATCHPACK_POLLING=true
     command:
-      code-server --bind-addr 0.0.0.0:8080 --auth none /home/coder/project
+        code-server --bind-addr 0.0.0.0:8080 --auth none /home/coder/project
     networks:
       - my_network
 
 networks:
   my_network:
     driver: bridge
+
+volumes:
+  frontend-src-${EMPLOYEE_NO}:
+    driver: local
+
 EOF
 )
 
