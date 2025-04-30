@@ -299,7 +299,7 @@ app.post("/api/login",(req,res)=>{
     const shScriptPath = path.join(__dirname, `generate-docker-compose-${question}-${framework}.sh`);
   
     // Ensure the .sh file has execute permission
-    const command = `sudo bash "${shScriptPath}" "${userId}" "${empNo}`;
+    const command = `sudo bash "${shScriptPath}" "${userId}" "${empNo}"`;
   
     exec(command, (error, stdout, stderr) => {
       if (error) {
