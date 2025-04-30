@@ -2,6 +2,7 @@
 
 # Accept UserID as an argument
 USER_ID=$1
+EMPLOYEE_NO=$2
 
 if [ -z "$USER_ID" ]; then
   echo "Usage: ./generate-docker-compose-a1l1.sh <UserID>"
@@ -25,7 +26,7 @@ services:
       - "8081:8080"
       - "5174:5173"
     volumes:
-      - frontend-src:/home/coder/project/src
+      - frontend-src-${EMPLOYEE_NO}:/home/coder/project/src
     environment:
       - WATCHPACK_POLLING=true
     command:
@@ -38,7 +39,7 @@ networks:
     driver: bridge
 
 volumes:
-  frontend-src:
+  frontend-src-${EMPLOYEE_NO}:
     driver: local
 
 EOF

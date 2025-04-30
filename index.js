@@ -293,13 +293,13 @@ app.post("/api/login",(req,res)=>{
   });
 
   app.post('/api/run-script', (req, res) => {
-    const { userId, userName, question, framework } = req.body;
+    const { userId, empNo, userName, question, framework } = req.body;
   
     // Adjust this to your actual file structure
     const shScriptPath = path.join(__dirname, `generate-docker-compose-${question}-${framework}.sh`);
   
     // Ensure the .sh file has execute permission
-    const command = `bash "${shScriptPath}" "${userId}"`;
+    const command = `sudo bash "${shScriptPath}" "${userId}" "${empNo}`;
   
     exec(command, (error, stdout, stderr) => {
       if (error) {
@@ -457,6 +457,33 @@ app.post("/api/login",(req,res)=>{
       });
     
   
+  });
+
+  app.post('/api/candidate', async (req, res) => {
+    const { userId, name, employeeNo } = req.body;
+  
+    if (!userId || !name || !employeeNo) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+  
+    try {
+      // Check if userId or employeeNo already exists
+      const checkQuery = 'SELECT * FROM UserReference WHERE employeeNo = ?';
+      const [existingUsers] = await con.promise().query(checkQuery, [employeeNo]);
+  
+      if (existingUsers.length > 0) {
+        return res.status(409).json({ error: 'User with this ID or Employee Number already exists' });
+      }
+  
+      // Insert new user if no duplicates found
+      const insertQuery = 'INSERT INTO UserReference (userId, name, employeeNo) VALUES (?, ?, ?)';
+      const [result] = await con.promise().query(insertQuery, [userId, name, employeeNo]);
+  
+      res.status(201).json({ message: 'Candidate data saved successfully', id: result.insertId });
+    } catch (err) {
+      console.error('Error saving candidate data:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    }
   });
 
   
