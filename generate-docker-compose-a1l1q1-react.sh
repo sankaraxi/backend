@@ -27,14 +27,14 @@ if [ -z "$(ls -A "$HOST_SRC_PATH")" ]; then
   
   # Copy contents from the image to host
   docker cp "${TMP_CONTAINER}:/home/coder/project/src/." "$HOST_SRC_PATH"
-
-  sudo chown -R 1000:1000 "$HOST_SRC_PATH"
-
+  
   # Clean up the temporary container
   docker rm "$TMP_CONTAINER"
 else
   echo "Host path already has files. Skipping copy."
 fi
+
+sudo chown -R 1000:1000 "$HOST_SRC_PATH"
 
 # Generate Docker Compose file content
 COMPOSE_CONTENT=$(cat <<EOF
