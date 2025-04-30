@@ -1,18 +1,20 @@
 #!/bin/bash
 
-# Accept UserID as an argument
+# Accept UserID and EmployeeNo as arguments
 USER_ID=$1
 EMPLOYEE_NO=$2
 
-if [ -z "$USER_ID" ]; then
-  echo "Usage: ./generate-docker-compose-a1l1.sh <UserID>"
+if [ -z "$USER_ID" ] || [ -z "$EMPLOYEE_NO" ]; then
+  echo "Usage: ./generate-docker-compose-a1l1.sh <UserID> <EmployeeNo>"
   exit 1
 fi
 
 # Variables
 PORT=$((8080 + USER_ID))
-# PASSWORD="test"
-# IMAGE_NAME="krishnapriyap/merntest:latest"
+HOST_SRC_PATH="/home/kgm/docker-volumes/${EMPLOYEE_NO}"
+
+# Ensure the host path exists
+mkdir -p "$HOST_SRC_PATH"
 
 # Generate Docker Compose file content
 COMPOSE_CONTENT=$(cat <<EOF
@@ -23,25 +25,20 @@ services:
     container_name: "code-server-a1l1q1-react-${USER_ID}"
     image: "sankarkg/a1l1q1-react:latest"
     ports:
-      - "8084:8080"
+      - "${PORT}:8080"
       - "5177:5173"
     volumes:
-      - frontend-src-${EMPLOYEE_NO}:/home/coder/project/src
+      - ${HOST_SRC_PATH}:/home/coder/project/src
     environment:
       - WATCHPACK_POLLING=true
     command:
-        code-server --bind-addr 0.0.0.0:8080 --auth none /home/coder/project
+      code-server --bind-addr 0.0.0.0:8080 --auth none /home/coder/project
     networks:
       - my_network
 
 networks:
   my_network:
     driver: bridge
-
-volumes:
-  frontend-src-${EMPLOYEE_NO}:
-    driver: local
-
 EOF
 )
 
