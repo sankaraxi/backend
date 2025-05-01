@@ -13,7 +13,7 @@ fi
 
 # Variables
 PORT=$((8080 + USER_ID))
-HOST_SRC_PATH="/home/kgm/docker-volumes/${EMPLOYEE_NO}/react"
+HOST_SRC_PATH="/home/ubuntu/docker-volumes/${EMPLOYEE_NO}/react"
 IMAGE_NAME="sankarkg/a1l1q3-react:latest"
 TMP_CONTAINER="temp-initializer-${USER_ID}"
 

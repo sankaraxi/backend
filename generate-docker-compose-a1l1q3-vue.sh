@@ -13,7 +13,7 @@ fi
 
 # Variables
 PORT=$((8080 + USER_ID))
-HOST_SRC_PATH="/home/kgm/docker-volumes/${EMPLOYEE_NO}/vue"
+HOST_SRC_PATH="/home/ubuntu/docker-volumes/${EMPLOYEE_NO}/vue"
 IMAGE_NAME="sankarkg/a1l1q3-vue:latest"
 TMP_CONTAINER="temp-initializer-${USER_ID}"
 
