@@ -296,36 +296,39 @@ app.post("/api/login",(req,res)=>{
   app.post('/api/run-script', (req, res) => {
     const { userId, empNo, userName, question, framework, dockerPort, outputPort } = req.body;
   
-    // Adjust this to your actual file structure
+    // Construct shell script path
     const shScriptPath = path.join(__dirname, `generate-docker-compose-${question}-${framework}.sh`);
   
-    // Ensure the .sh file has execute permission
+    // Shell command with arguments (ensure script is executable with chmod +x)
     const command = `sudo bash "${shScriptPath}" "${userId}" "${empNo}" "${dockerPort}" "${outputPort}"`;
   
     exec(command, (error, stdout, stderr) => {
       if (error) {
-        console.error(`❌ Error running shell script: ${error.message}`);
-        return res.status(500).json({ error: error.message });
+        console.error(`❌ Shell Execution Error: ${error.message}`);
+        return res.status(500).json({ status: "error", message: "Script execution failed", error: error.message });
       }
+  
       if (stderr) {
-        console.error(`⚠️ Stderr: ${stderr}`);
+        console.warn(`⚠️ Shell Stderr: ${stderr}`);
+        // Optionally include stderr in response
       }
   
       console.log(`✅ Script Output:\n${stdout}`);
   
-      // Insert into DB after script execution
+      // Log activity to DB
       const insertQuery = "INSERT INTO user_log (userid, activity_code) VALUES (?, ?)";
-      con.query(insertQuery, [userId, 2], (err, result) => {
-        if (err) {
-          console.error("DB Insert Error:", err);
-          return res.status(500).json({ status: "error", message: "DB insert failed" });
-        } else {
-          console.log("✅ DB insert success");
-          return res.status(200).json({ status: "success", output: stdout });
+      con.query(insertQuery, [userId, 2], (dbError, result) => {
+        if (dbError) {
+          console.error("❌ DB Insert Error:", dbError);
+          return res.status(500).json({ status: "error", message: "Database insert failed", error: dbError.message });
         }
+  
+        console.log("🟢 DB Insert Successful");
+        return res.status(200).json({ status: "success", output: stdout });
       });
     });
   });
+  
 
   app.post('/api/cleanup-docker', async (req, res) => {
     const { userId } = req.body;
