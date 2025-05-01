@@ -65,6 +65,7 @@ app.post("/api/login",(req,res)=>{
         let question=result[0].assigned_question
         let docker_port=result[0].docker_port
         let output_port=result[0].output_port
+        let empNo=result[0].employee_no
         if(dbusername===username && dbpassword===password){
           var insertcategory="insert into user_log (userid,activity_code)values(?,?)"
           con.query(insertcategory,[id , 1],(error,result)=>{
@@ -78,7 +79,7 @@ app.post("/api/login",(req,res)=>{
                 //  res.send({"status":"inserted"})
               }
           })
-          res.send({"status":"success","id":id,"role":role,"name":name,"question":question,"docker_port":docker_port,"output_port":output_port})
+          res.send({"status":"success","id":id,"role":role,"name":name,"question":question,"docker_port":docker_port,"output_port":output_port,"empNo": empNo})
           
           console.log("sucess",id,role, name)
         }
