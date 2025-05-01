@@ -472,7 +472,7 @@ app.post("/api/login",(req,res)=>{
   
     try {
       // Check if userId or employeeNo already exists
-      const checkQuery = 'SELECT * FROM UserReference WHERE employeeNo = ?';
+      const checkQuery = 'SELECT * FROM userreference WHERE employeeNo = ?';
       const [existingUsers] = await con.promise().query(checkQuery, [employeeNo]);
   
       if (existingUsers.length > 0) {
@@ -480,7 +480,7 @@ app.post("/api/login",(req,res)=>{
       }
   
       // Insert new user if no duplicates found
-      const insertQuery = 'INSERT INTO UserReference (userId, name, employeeNo) VALUES (?, ?, ?)';
+      const insertQuery = 'INSERT INTO userreference (userId, name, employeeNo) VALUES (?, ?, ?)';
       const [result] = await con.promise().query(insertQuery, [userId, name, employeeNo]);
   
       res.status(201).json({ message: 'Candidate data saved successfully', id: result.insertId });
