@@ -7,12 +7,19 @@ async function a1l1q1(id, framework) {
   
   // Define base URL based on framework
   let baseURL = '';
-  if (framework === 'react') {
+  if (id=== '6' && framework === 'react') {
     baseURL = 'http://localhost:5177';
-  } else if (framework === 'vue') {
+  } else if (id=== '6' && framework === 'vue') {
     baseURL = 'http://localhost:5178';
-  }
-
+  } else if (id=== '9' && framework === 'react') {
+    baseURL = 'http://localhost:5179';
+  } else if (id=== '9' && framework === 'vue') {
+    baseURL = 'http://localhost:5180';
+  } else if (id=== '12' && framework === 'react') {
+    baseURL = 'http://localhost:5185';
+  } else if (id=== '12' && framework === 'vue') {
+    baseURL = 'http://localhost:5186';
+  } 
   const browser = await chromium.launch();
   const page = await browser.newPage();
   await page.goto(baseURL);
@@ -59,6 +66,7 @@ async function a1l1q1(id, framework) {
       averageLoadTime: avgLoadTime,
       loadTimes
     };
+    
   }
 
   // Responsiveness test function
@@ -114,6 +122,8 @@ async function a1l1q1(id, framework) {
   }
 
   // CSS property check function
+  const expectedFound = [];
+
   async function checkCssProperty(page, selector, property, expectedValue) {
     const element = await page.$(selector);
     if (!element) {
@@ -156,6 +166,8 @@ async function a1l1q1(id, framework) {
     }
     
     console.log(`🧪 ${selector} ${property} → Expected: ${expectedValue}, Found: ${actualValue}`);
+    expectedFound.push({ selector: selector, property: property, expectedValue: expectedValue, actualValue: actualValue });
+
     return isMatch;
   }
 
@@ -213,12 +225,12 @@ async function a1l1q1(id, framework) {
   const classifications = [
     // Essentials
     {
-        name: 'Concurrent Load Time',
-        selector: 'html',
-        score: performanceResult.score || 0,  // from load test
-        category: 'Efficiency',
-        check: performanceTest
-      },
+      name: 'Concurrent Load Time',
+      selector: 'html',
+      score: performanceResult.score || 0,  // from load test
+      category: 'Efficiency',
+      check: performanceTest
+    },
       {
         name: 'Responsiveness',
         selector: 'body',
@@ -432,20 +444,40 @@ async function a1l1q1(id, framework) {
     // Add the rule score to the total and the max score to the max score for the category
     maxScoreByCategory[rule.category] += rule.score;
 
+      // Find the corresponding entry in expectedFound for CSS property checks
+  const logEntry = expectedFound.find(
+    (entry) =>
+      entry.selector === rule.selector &&
+      entry.property === rule.property &&
+      entry.expectedValue === rule.expectedValue
+  );
+
     if (result) {
       console.log(`✅ Passed: ${rule.name} (+${rule.score})`);
       scoreByCategory[rule.category] += rule.score;
       detailedResults.push({
         category: rule.category,
         name: rule.name,
-        score: rule.score
+        score: rule.score,
+        ReviewDetails: {
+          selector: rule.selector,
+          property: rule.property,
+          expectedValue: logEntry?.expectedValue,
+          actualValue: logEntry ? logEntry.actualValue : null // Use the actual value from expectedFound
+        }
       });
     } else {
       console.log(`❌ Failed: ${rule.name}`);
       detailedResults.push({
         category: rule.category,
         name: rule.name,
-        score: 0
+        score: 0,
+        ReviewDetails: {
+          selector: rule.selector,
+          property: rule.property,
+          expectedValue: logEntry?.expectedValue,
+          actualValue: logEntry ? logEntry.actualValue : null // Use the actual value from expectedFound
+        }
       });
     }
   }
@@ -460,7 +492,7 @@ async function a1l1q1(id, framework) {
   await browser.close();
   return {
     AvgLoadTime: performanceResult.averageLoadTime, 
-    EvaluationDetails: detailedResults
+    EvaluationDetails: detailedResults,
   };
 }
 

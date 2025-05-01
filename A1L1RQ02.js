@@ -7,10 +7,18 @@ async function a1l1q2(id, framework) {
   
   // Define base URL based on framework
   let baseURL = '';
-  if (framework === 'react') {
+  if (id ==='7' && framework === 'react') {
     baseURL = 'http://localhost:5175';
-  } else if (framework === 'vue') {
+  } else if (id=== '7' && framework === 'vue') {
     baseURL = 'http://localhost:5176';
+  } else if (id=== '10' && framework === 'react') {
+    baseURL = 'http://localhost:5181';
+  } else if (id=== '10' && framework === 'vue') {
+    baseURL = 'http://localhost:5182';
+  }  else if (id=== '13' && framework === 'react') {
+    baseURL = 'http://localhost:5187';
+  } else if (id=== '13' && framework === 'vue') {
+    baseURL = 'http://localhost:5188';
   }
 
   const browser = await chromium.launch();
@@ -112,7 +120,7 @@ async function a1l1q2(id, framework) {
     });
     return structureIsValid.structureOk;
   }
-
+  const expectedFound = [];
   // CSS property check function
   async function checkCssProperty(page, selector, property, expectedValue) {
     const element = await page.$(selector);
@@ -156,6 +164,7 @@ async function a1l1q2(id, framework) {
     }
     
     console.log(`🧪 ${selector} ${property} → Expected: ${expectedValue}, Found: ${actualValue}`);
+     expectedFound.push({ selector: selector, property: property, expectedValue: expectedValue, actualValue: actualValue });
     return isMatch;
   }
 
@@ -189,6 +198,7 @@ async function a1l1q2(id, framework) {
     const expectedColor = hexToRgb(expectedHexColor);
     
     console.log(`🎨 ${selector} → Expected: ${expectedColor}, Found: ${actualColor}`);
+    expectedFound.push({ selector: selector, expectedValue: expectedColor, actualValue: expectedColor });
     return actualColor === expectedColor;
   }
   
@@ -403,6 +413,7 @@ async function a1l1q2(id, framework) {
   const detailedResults = [];
 
   for (const rule of classifications) {
+    
     const result = await rule.check(page, rule.selector, rule.expectedColor || rule.expectedValue);
     if (!scoreByCategory[rule.category]) {
       scoreByCategory[rule.category] = 0;
@@ -412,20 +423,40 @@ async function a1l1q2(id, framework) {
     // Add the rule score to the total and the max score to the max score for the category
     maxScoreByCategory[rule.category] += rule.score;
 
+     // Find the corresponding entry in expectedFound for CSS property checks
+  const logEntry = expectedFound.find(
+    (entry) =>
+      entry.selector === rule.selector &&
+      entry.property === rule.property &&
+      entry.expectedValue === rule.expectedValue
+  );
+
     if (result) {
       console.log(`✅ Passed: ${rule.name} (+${rule.score})`);
       scoreByCategory[rule.category] += rule.score;
       detailedResults.push({
         category: rule.category,
         name: rule.name,
-        score: rule.score
+        score: rule.score,
+        ReviewDetails: {
+          selector: rule.selector,
+          property: rule.property,
+          expectedValue: logEntry?.expectedValue,
+          actualValue: logEntry ? logEntry.actualValue : null // Use the actual value from expectedFound
+        }
       });
     } else {
       console.log(`❌ Failed: ${rule.name}`);
       detailedResults.push({
         category: rule.category,
         name: rule.name,
-        score: 0
+        score: 0,
+        ReviewDetails: {
+          selector: rule.selector,
+          property: rule.property,
+          expectedValue: logEntry?.expectedValue,
+          actualValue: logEntry ? logEntry.actualValue : null // Use the actual value from expectedFound
+        }
       });
     }
   }

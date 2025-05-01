@@ -3,6 +3,8 @@
 # Accept UserID and EmployeeNo as arguments
 USER_ID=$1
 EMPLOYEE_NO=$2
+DOCKER_PORT=$3
+OUTPUT_PORT=$4
 
 if [ -z "$USER_ID" ] || [ -z "$EMPLOYEE_NO" ]; then
   echo "Usage: ./generate-docker-compose-a1l1.sh <UserID> <EmployeeNo>"
@@ -45,8 +47,8 @@ services:
     container_name: "code-server-a1l1q1-react-${USER_ID}"
     image: "$IMAGE_NAME"
     ports:
-      - "8084:8080"
-      - "5177:5173"
+      - "${DOCKER_PORT}:8080"
+      - "${OUTPUT_PORT}:5173"
     volumes:
       - ${HOST_SRC_PATH}:/home/coder/project/src
     environment:
