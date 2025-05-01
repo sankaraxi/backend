@@ -20,11 +20,11 @@ version: '3.8'
 
 services:
   code-server:
-    container_name: "code-server-a1l1q1-react-${USER_ID}"
-    image: "sankarkg/a1l1q1-react:latest"
+    container_name: "code-server-a1l1q3-react-${USER_ID}"
+    image: "sankarkg/a1l1q3-react:latest"
     ports:
-      - "8084:8080"
-      - "5177:5173"
+      - "8080:8080"
+      - "5173:5173"
     volumes:
       - frontend-src-${EMPLOYEE_NO}:/home/coder/project/src
     environment:
@@ -53,10 +53,10 @@ echo "Docker Compose Content:"
 echo "$COMPOSE_CONTENT"
 
 # Save the content to a Docker Compose file
-COMPOSE_FILE_NAME="docker-compose-a1l1q1-react-${USER_ID}.yml"
+COMPOSE_FILE_NAME="docker-compose-a1l1q3-react-${USER_ID}.yml"
 echo "$COMPOSE_CONTENT" > "$COMPOSE_FILE_NAME"
 
 chmod +x "$COMPOSE_FILE_NAME"
 
 # Run Docker Compose to start the containers
-docker compose -f "$COMPOSE_FILE_NAME" -p a1l1q1-react-${USER_ID} up -d
+docker compose -f "$COMPOSE_FILE_NAME" -p a1l1q3-react-${USER_ID} up -d

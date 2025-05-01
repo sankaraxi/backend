@@ -13,8 +13,8 @@ fi
 
 # Variables
 PORT=$((8080 + USER_ID))
-HOST_SRC_PATH="/home/kgm/docker-volumes/${EMPLOYEE_NO}/react"
-IMAGE_NAME="sankarkg/a1l1q2-react:latest"
+HOST_SRC_PATH="/home/kgm/docker-volumes/${EMPLOYEE_NO}/vue"
+IMAGE_NAME="sankarkg/a1l1q1-vue:latest"
 TMP_CONTAINER="temp-initializer-${USER_ID}"
 
 # Ensure the host path exists
@@ -44,7 +44,7 @@ version: '3.8'
 
 services:
   code-server:
-    container_name: "code-server-a1l1q2-react-${USER_ID}"
+    container_name: "code-server-a1l1q1-vue-${USER_ID}"
     image: "$IMAGE_NAME"
     ports:
       - "${DOCKER_PORT}:8080"
@@ -65,7 +65,7 @@ EOF
 )
 
 # Save the Docker Compose file
-COMPOSE_FILE_NAME="docker-compose-a1l1q2-react-${USER_ID}.yml"
+COMPOSE_FILE_NAME="docker-compose-a1l1q1-vue-${USER_ID}.yml"
 echo "$COMPOSE_CONTENT" > "$COMPOSE_FILE_NAME"
 chmod +x "$COMPOSE_FILE_NAME"
 
@@ -74,4 +74,4 @@ echo "Generated Compose file: $COMPOSE_FILE_NAME"
 echo "Launching container on port $PORT..."
 
 # Run Docker Compose to start the containers
-docker compose -f "$COMPOSE_FILE_NAME" -p a1l1q2-react-${USER_ID} up -d
+docker compose -f "$COMPOSE_FILE_NAME" -p a1l1q1-vue-${USER_ID} up -d
