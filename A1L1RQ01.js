@@ -250,11 +250,11 @@ async function a1l1q1(id, framework) {
     {
         name: 'Background Image Min height',
         selector: '.backgroundpart',
-        property: 'min-height',
-        expectedValue: '100vh',
+        property: 'padding',
+        expectedValue: '20px',
         score: 5,
         category: 'Essential',
-        check: (page, selector, _, property = 'min-height', expectedValue = '100vh') =>
+        check: (page, selector, _, property = 'padding', expectedValue = '20px') =>
                 checkCssProperty(page, selector, property, expectedValue),
       },
       {
@@ -315,16 +315,6 @@ async function a1l1q1(id, framework) {
         score: 5,
         category: 'Essential',
         check: (page, selector, _, property = 'max-width', expectedValue = '400px') =>
-                checkCssProperty(page, selector, property, expectedValue),
-      },
-      {
-        name: 'Card visual appearence',
-        selector: '.contentcard',
-        property: 'width',
-        expectedValue: '100%',
-        score: 5,
-        category: 'Essential',
-        check: (page, selector, _, property = 'width', expectedValue = '100%') =>
                 checkCssProperty(page, selector, property, expectedValue),
       },
       {

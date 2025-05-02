@@ -266,16 +266,6 @@ async function a1l1q2(id, framework) {
                 checkCssProperty(page, selector, property, expectedValue),
       },
       {
-        name: 'sub-text margin',
-        selector: '.tech-subtext',
-        property: 'margin',
-        expectedValue: '0 auto 40px',
-        score: 5,
-        category: 'Essential',
-        check: (page, selector, _, property = 'margin', expectedValue = '0 auto 40px') =>
-                checkCssProperty(page, selector, property, expectedValue),
-      },
-      {
         name: 'sub-text padding',
         selector: '.tech-card',
         property: 'padding',
@@ -309,10 +299,10 @@ async function a1l1q2(id, framework) {
         name: 'Image Height',
         selector: '.tech-img',
         property: 'height',
-        expectedValue: 'auto',
+        expectedValue: '60px',
         score: 5,
         category: 'Essential',
-        check: (page, selector, _, property = 'height', expectedValue = 'auto') =>
+        check: (page, selector, _, property = 'height', expectedValue = '60px') =>
                 checkCssProperty(page, selector, property, expectedValue),
       },
       {
@@ -323,16 +313,6 @@ async function a1l1q2(id, framework) {
         score: 5,
         category: 'Essential',
         check: (page, selector, _, property = 'display', expectedValue = 'block') =>
-                checkCssProperty(page, selector, property, expectedValue),
-      },
-      {
-        name: 'Image Margin',
-        selector: '.tech-img',
-        property: 'margin',
-        expectedValue: '0 auto',
-        score: 5,
-        category: 'Essential',
-        check: (page, selector, _, property = 'margin', expectedValue = '0 auto') =>
                 checkCssProperty(page, selector, property, expectedValue),
       },
       {

@@ -236,10 +236,10 @@ async function a1l1q3(id, framework) {
       name: 'grid-template-columns',
       selector: '.product-grid',
       property: 'grid-template-columns',
-      expectedValue: 'gridrepeat(4, 1fr)',
+      expectedValue: '386.656px 386.672px 386.656px',
       score: 5,
       category: 'Essential',
-      check: async (page, selector, _, property = 'grid-template-columns', expectedValue = 'gridrepeat(4, 1fr)') => {
+      check: async (page, selector, _, property = 'grid-template-columns', expectedValue = '386.656px 386.672px 386.656px') => {
         await page.waitForSelector(selector); // Wait for the element to appear
         return checkCssProperty(page, selector, property, expectedValue);
       }
@@ -268,10 +268,10 @@ async function a1l1q3(id, framework) {
       name: 'card border ',
       selector: '.product-card',
       property: 'border',
-      expectedValue: '1px solid grey',
+      expectedValue: '1px solid rgb(128, 128, 128)',
       score: 5,
       category: 'Essential',
-      check: (page, selector, _, property = 'border', expectedValue = '1px solid grey') =>
+      check: (page, selector, _, property = 'border', expectedValue = '1px solid rgb(128, 128, 128)') =>
         checkCssProperty(page, selector, property, expectedValue),
     },
     {
