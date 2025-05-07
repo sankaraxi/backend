@@ -98,27 +98,32 @@ async function a1l1q2(id, framework) {
 
   // Check HTML structure function
   async function checkHtmlStructure(page) {
-    const structureIsValid = await page.evaluate(() => {
-      const html = document.documentElement;
-      const head = document.head;
-      const body = document.body;
-      const hasHtmlTag = html && html.tagName.toLowerCase() === 'html';
-      const hasHeadTag = head && head.tagName.toLowerCase() === 'head';
-      const hasBodyTag = body && body.tagName.toLowerCase() === 'body';
-      const metaTags = head.querySelectorAll('meta');
-      const titleTag = head.querySelector('title');
-      const hasMeta = metaTags.length > 0;
-      const hasTitle = !!titleTag;
-      return {
-        hasHtmlTag,
-        hasHeadTag,
-        hasMeta,
-        hasTitle,
-        hasBodyTag,
-        structureOk: hasHtmlTag && hasHeadTag && hasMeta && hasTitle && hasBodyTag
+    console.log("Checking label structure...");
+  
+    const result = await page.evaluate(() => {
+      const label = document.querySelector('label');
+      const debug = {
+        labelExists: !!label,
+        labelText: '',
+        containsText: false
       };
+  
+      if (label) {
+        const text = label.textContent || '';
+        debug.labelText = text;
+        debug.containsText = text.includes("Designed and Developed by");
+      }
+  
+      return debug;
     });
-    return structureIsValid.structureOk;
+  
+    // Debug output
+    console.log("Label Found:", result.labelExists);
+    console.log("Label Text:", result.labelText);
+    console.log("Contains Required Text:", result.containsText);
+  
+    // Return true only if label exists and contains the required text
+    return result.labelExists && result.containsText;
   }
   const expectedFound = [];
   // CSS property check function

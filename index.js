@@ -4,6 +4,7 @@ const bodyparser = require('body-parser')
 const mysql=require('mysql2')
 require("dotenv").config();
 const path = require('path');
+const cron = require('node-cron'); // ✅ Cron import here
 const app = express()
 const { a1l1q2 } = require("./A1L1RQ02.js");
 const { a1l1q1 } = require("./A1L1RQ01.js");
@@ -47,53 +48,80 @@ con.getConnection((error, connection) => {
 
 module.exports = con;
 
+cron.schedule('*/3 * * * *', () => {
+  const sql = `UPDATE cocube_user SET log_status = 0 WHERE login_expiry < NOW() AND log_status = 1`;
+  con.query(sql, (err) => {
+    if (err) console.log("🔴 Cron cleanup failed:", err);
+    else console.log("🧹 Expired sessions cleaned up.");
+  });
+});
+
 
 app.post("/api/login",(req,res)=>{
-    let{username,password}=req.body
-    let loginsql='select * from cocube_user where emailid=?'
-    con.query(loginsql,[username],(error,result)=>{
-      if(error){
-        res.send({"status":"empty_set"})
-        console.log(error)
-      }
-      else if(result.length>0){
-        let dbusername=result[0].emailid
-        let dbpassword=result[0].password
-        let id=result[0].id
-        let role=result[0].role
-        let name=result[0].name
-        let question=result[0].assigned_question
-        let docker_port=result[0].docker_port
-        let output_port=result[0].output_port
-        let empNo=result[0].employee_no
-        if(dbusername===username && dbpassword===password){
-          var insertcategory="insert into user_log (userid,activity_code)values(?,?)"
-          con.query(insertcategory,[id , 1],(error,result)=>{
-              if(error){
-                  console.log(error)
-                  // res.send({"status":"error"})
+  let{username,password}=req.body
+  let loginsql='select * from cocube_user where emailid=?'
+  con.query(loginsql,[username],(error,result)=>{
+    if(error){
+      res.send({"status":"empty_set"})
+      console.log(error)
+    }
+    else if(result.length>0){
+      let dbusername=result[0].emailid
+      let dbpassword=result[0].password
+      let id=result[0].id
+      let role=result[0].role
+      let name=result[0].name
+      let question=result[0].assigned_question
+      let docker_port=result[0].docker_port
+      let output_port=result[0].output_port
+      let log_status=result[0].log_status
+      let empNo=result[0].employee_no
+      if(dbusername===username && dbpassword===password){
 
-              }
-              else{
-                console.log("inserted")
-                //  res.send({"status":"inserted"})
-              }
-          })
-          res.send({"status":"success","id":id,"role":role,"name":name,"question":question,"docker_port":docker_port,"output_port":output_port,"empNo": empNo})
-          
-          console.log("sucess",id,role, name)
+        if (log_status === 1) {
+          console.log("User already logged in");
+          return res.send({ "status": "already_logged_in" });
         }
-        else{
-          res.send({"status":"invalid_user"})
-          console.log("notmatch")
-        }
+        var insertcategory="insert into user_log (userid,activity_code)values(?,?)"
+        con.query(insertcategory,[id , 1],(error,result)=>{
+            if(error){
+                console.log(error)
+                // res.send({"status":"error"})
+
+            }
+            else{
+              console.log("inserted")
+              //  res.send({"status":"inserted"})
+            }
+        })
+        var updateQuery = 'UPDATE cocube_user SET log_status = 1 WHERE id = ?';
+        con.query(updateQuery,[id],(error,result)=>{
+          if(error){
+              console.log(error)
+              // res.send({"status":"error"})
+
+          }
+          else{
+            console.log("updated")
+            //  res.send({"status":"inserted"})
+          }
+      })
+        
+        res.send({"status":"success","id":id,"role":role,"name":name,"question":question,"docker_port":docker_port,"output_port":output_port,"empNo": empNo})
+        
+        console.log("sucess",id,role, name)
       }
       else{
-        res.send({"status":"both_are_invalid"})
-        console.log("invaliald")
+        res.send({"status":"invalid_user"})
+        console.log("notmatch")
       }
-    })
+    }
+    else{
+      res.send({"status":"both_are_invalid"})
+      console.log("invaliald")
+    }
   })
+})
 
   app.post('/api/run-Assesment', async (req, res) => {
     const { userId, framework } = req.body;
@@ -326,6 +354,22 @@ app.post("/api/login",(req,res)=>{
         console.log("🟢 DB Insert Successful");
         return res.status(200).json({ status: "success", output: stdout });
       });
+
+      const updateQuery = 'UPDATE cocube_user SET last_login = ?, login_expiry = ? WHERE id = ?';
+
+      const EXPIRES_IN = 40 * 60 * 1000; // 30 mins in ms
+      const issuedAt = new Date();
+      const expiresAt = new Date(Date.now() + EXPIRES_IN);
+
+      con.query(updateQuery, [issuedAt, expiresAt, userId], (updateError, updateResult) => {
+        if (updateError) {
+          console.error(`🔴 DB Error (Update): ${updateError}`);
+          return res.status(500).json({ status: "error", message: "User update failed" });
+        }
+      
+        console.log("🟢 User timestamps updated");
+        // You can send response here if this is the last step
+      });
     });
   });
   
@@ -415,6 +459,19 @@ app.post("/api/login",(req,res)=>{
           //  res.send({"status":"inserted"})
         }
     });
+
+    var updateQuery = 'UPDATE cocube_user SET log_status = 0 WHERE id = ?';
+    con.query(updateQuery,[userId],(error,result)=>{
+      if(error){
+          console.log(error)
+          // res.send({"status":"error"})
+
+      }
+      else{
+        console.log("updated")
+        //  res.send({"status":"inserted"})
+      }
+  });
       
   
       // Send success response
@@ -463,6 +520,50 @@ app.post("/api/login",(req,res)=>{
   
   });
 
+  app.post('/api/logout', async (req, res) => {
+    const { userId } = req.body;
+
+    // Validate userId
+    if (!userId) {
+      return res.status(400).json({ error: 'userId is required' });
+    }
+
+    try {
+      // Insert second log entry (activity_code: 5)
+      const insertCategory2 = 'INSERT INTO user_log (userid, activity_code) VALUES (?, ?)';
+      con.query(insertCategory2, [userId, 5],(error,result)=>{
+        if(error){
+            console.log(error)
+            // res.send({"status":"error"})
+
+        }
+        else{
+          console.log('Inserted log with activity_code 5');
+          //  res.send({"status":"inserted"})
+        }
+      });
+
+      var updateQuery = 'UPDATE cocube_user SET log_status = 0 WHERE id = ?';
+      con.query(updateQuery,[userId],(error,result)=>{
+        if(error){
+            console.log(error)
+            // res.send({"status":"error"})
+
+        }
+        else{
+          console.log("updated")
+          //  res.send({"status":"inserted"})
+        }
+      });
+      
+      // Send success response
+      res.status(200).json({ status: 'success', message: 'logged out' });
+    } catch (err) {
+      console.error('Failed to logout:', err);
+      res.status(500).json({ error: 'Failed to logout' });
+    }
+  });
+  
   app.post('/api/candidate', async (req, res) => {
     const { userId, name, employeeNo } = req.body;
   

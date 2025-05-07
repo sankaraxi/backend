@@ -98,28 +98,45 @@ async function a1l1q3(id, framework) {
 
   // Check HTML structure function
   async function checkHtmlStructure(page) {
-    const structureIsValid = await page.evaluate(() => {
-      const html = document.documentElement;
-      const head = document.head;
-      const body = document.body;
-      const hasHtmlTag = html && html.tagName.toLowerCase() === 'html';
-      const hasHeadTag = head && head.tagName.toLowerCase() === 'head';
-      const hasBodyTag = body && body.tagName.toLowerCase() === 'body';
-      const metaTags = head.querySelectorAll('meta');
-      const titleTag = head.querySelector('title');
-      const hasMeta = metaTags.length > 0;
-      const hasTitle = !!titleTag;
-      return {
-        hasHtmlTag,
-        hasHeadTag,
-        hasMeta,
-        hasTitle,
-        hasBodyTag,
-        structureOk: hasHtmlTag && hasHeadTag && hasMeta && hasTitle && hasBodyTag
+    console.log("Checking label structure...");
+  
+    // First, fetch the product count from the API outside of the browser context
+    const response = await fetch('https://fakestoreapi.com/products');
+    const data = await response.json();
+    const expectedCount = data.length;
+  
+    // Then evaluate in the browser context
+    const result = await page.evaluate(() => {
+      const label = document.querySelector('label');
+      const debug = {
+        labelExists: !!label,
+        labelText: '',
+        numberInLabel: null
       };
+  
+      if (label) {
+        const text = label.textContent || '';
+        debug.labelText = text;
+  
+        // Extract number from label text (e.g., "Total Products: 20")
+        const match = text.match(/\d+/);
+        if (match) {
+          debug.numberInLabel = parseInt(match[0], 10);
+        }
+      }
+  
+      return debug;
     });
-    return structureIsValid.structureOk;
+  
+    // Debug output
+    console.log("Label Found:", result.labelExists);
+    console.log("Label Text:", result.labelText);
+    console.log("Number Found in Label:", result.numberInLabel);
+    console.log("Expected Product Count:", expectedCount);
+  
+    return result.labelExists && result.numberInLabel === expectedCount;
   }
+  
   const expectedFound = [];
   // CSS property check function
   async function checkCssProperty(page, selector, property, expectedValue) {

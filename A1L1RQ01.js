@@ -98,28 +98,33 @@ async function a1l1q1(id, framework) {
 
   // Check HTML structure function
   async function checkHtmlStructure(page) {
-    const structureIsValid = await page.evaluate(() => {
-      const html = document.documentElement;
-      const head = document.head;
-      const body = document.body;
-      const hasHtmlTag = html && html.tagName.toLowerCase() === 'html';
-      const hasHeadTag = head && head.tagName.toLowerCase() === 'head';
-      const hasBodyTag = body && body.tagName.toLowerCase() === 'body';
-      const metaTags = head.querySelectorAll('meta');
-      const titleTag = head.querySelector('title');
-      const hasMeta = metaTags.length > 0;
-      const hasTitle = !!titleTag;
+    console.log("Checking label structure...");
+    const result = await page.evaluate(() => {
+      const label = document.querySelector('label');
+      if (!label) return { found: false };
+      const labelText = label.textContent.trim();
+      // Extract time (e.g., from "Wednesday 07 May 2025, 14:38:05")
+      const timeMatch = labelText.match(/(\d{2}):(\d{2})(?::(\d{2}))?/);
+      if (!timeMatch) {
+        return { found: true, text: labelText, valid: false };
+      }
+      const labelHours = parseInt(timeMatch[1], 10);
+      const labelMinutes = parseInt(timeMatch[2], 10);
+      const now = new Date();
+      const currentHours = now.getHours();
+      const currentMinutes = now.getMinutes();
+      const timeIsClose =
+        labelHours === currentHours &&
+        Math.abs(labelMinutes - currentMinutes) <= 1;
       return {
-        hasHtmlTag,
-        hasHeadTag,
-        hasMeta,
-        hasTitle,
-        hasBodyTag,
-        structureOk: hasHtmlTag && hasHeadTag && hasMeta && hasTitle && hasBodyTag
+        found: true,
+        text: labelText,
+        valid: timeIsClose
       };
     });
-    return structureIsValid.structureOk;
-  }
+
+    return result.found
+   };
 
   // CSS property check function
   const expectedFound = [];
@@ -371,10 +376,10 @@ async function a1l1q1(id, framework) {
         name: 'Aesthetics Elements',
         selector: '.contentcard',
         property: 'background-color',
-        expectedColor: '#e6f9fc',
+        expectedColor: 'rgb(230, 249, 252)',
         score: 5,
         category: 'Required',
-        check: (page, selector, _, property = 'background-color', expectedValue = '#e6f9fc') =>
+        check: (page, selector, _, property = 'background-color', expectedValue = 'rgb(230, 249, 252)') =>
                 checkCssProperty(page, selector, property, expectedValue),
       },
     {
